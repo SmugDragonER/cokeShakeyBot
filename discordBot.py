@@ -161,6 +161,21 @@ class DiscordBot:
 
     async def on_ready(self):
         logging.info(f'Logged in as {self.client.user}')
+        channel = self.client.get_channel(1328537451068919838)
+        if channel:
+            async for message in channel.history(limit=10):
+                if message.author == self.client.user:
+                    self.reacted_message = message
+                    if message.content.startswith('Scrim sign-ups for'):
+                        return
+                    for reaction in message.reactions:
+                        async for user in reaction.users():
+                            if user != self.client.user:  # Ignoriere den Bot selbst
+                                self.reactions_dict[user.id] = str(reaction.emoji)
+                                await self.check_approved_reaction_count(message)
+                                logging.info(f'Benutzer {user.id} hat mit {reaction.emoji} reagiert.')
+                    break
+                break
 
     async def on_error(self, event_method, *args, **kwargs):
         logging.error(f"Ein Fehler ist im Event '{event_method}' aufgetreten.", exc_info=True)
