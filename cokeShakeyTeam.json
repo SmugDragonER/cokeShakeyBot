@@ -1,0 +1,22 @@
+{
+  "main_team": [
+    {
+      "name": "Smug",
+      "discord_id": 342049022812356611
+    },
+    {
+      "name": "Uvabu",
+      "discord_id": 452694750248828948
+    },
+    {
+      "name": "FDGood",
+      "discord_id": 242244489413001219
+    }
+  ],
+  "sub_team": [
+    {
+      "name": "Bobou",
+      "discord_id": 127610213615271936
+    }
+  ]
+}
