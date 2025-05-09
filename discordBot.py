@@ -9,11 +9,16 @@ class DiscordBot:
     def __init__(self, token: str):
         self.TOKEN = token
 
-        self.reactions_dict = {}
-        self.smug_discord_id = 342049022812356611
-        self.uvabu_discord_id = 452694750248828948
-        self.fd_discord_id = 242244489413001219
-        self.bobou_discord_id = 127610213615271936
+
+        self.main_team = [
+            {"name": "Smug", "discord_id": 342049022812356611},
+            {"name": "Uvabu", "discord_id": 452694750248828948},
+            {"name": "FDGood", "discord_id": 242244489413001219},
+        ]
+
+        self.sub_team = [
+            {"name": "Bobou", "discord_id": 127610213615271936},
+        ]
 
         intents = Intents.default()
         intents.message_content = True
@@ -120,6 +125,9 @@ class DiscordBot:
                     if self.deny_reaction_count == 1:
                         logging.info("One person denyed and can not play")
                         await message.channel.send(custom_message_full_roaster)
+                    else:
+                        logging.info("Bobou hat reagiert, aber kein deny deshalb passier nichts")
+                        return
                 else:
                     logging.info("Warte auf eine Reaktion von Bobou.")
                     return
@@ -147,17 +155,39 @@ class DiscordBot:
 
     async def check_approved_reaction_count(self, message: Message) -> None:
         try:
-            approved_count = sum(
-                1 for reaction in self.reactions_dict.values() if reaction == self.approved_reaction_emoji)
-            logging.info(f"Approved reactions: {approved_count}")
-            deny_count = sum(
-                1 for reaction in self.reactions_dict.values() if reaction == self.deny_reaction_emoji)
-            logging.info(f"Denied reactions: {deny_count}")
-            if approved_count >= 3:
-                logging.info("3 oder mehr approved reactions erkannt. Rufe send_full_signup auf.")
-                await self.send_full_signup(message, approved_count)
-        except Exception as e:
-            logging.error(f"An error occurred: {e}")
+            # Reactions of Main Players
+            main_team_reactions = [self.reactions_dict.get(player['discord_id']) for player in self.main_team]
+            approved_main = main_team_reactions.count('✅')
+            denied_main = main_team_reactions.count('❌')
+
+            logging.info(f"Main-Team reactions: {main_team_reactions}")
+            logging.info(f"Approved: {approved_main}, Denied: {denied_main}")
+
+            # Reactions of Sub Players
+            sub_team_reactions =[self.reactions_dict.get(player['discord_id']) for player in self.sub_team]
+            sub_approved =[r for r in sub_team_reactions if r == '✅']
+            sub_denied =[r for r in sub_team_reactions if r == '❌']
+
+            if approved_main ==len(self.main_team):
+                logging.info("Alle Main Spieler können. Sende Main Sign up")
+                await message.channel.send("Main Team!")
+                return
+
+            if denied_main == 1 and approved_main == len(self.main_team) - 1:
+                if sub_approved:
+                    await  message.channel.send("Full roster (mit Sub)")
+                elif any(r is None for r in sub_team_reactions):
+                    logging.info("one main player can't, wait for sub")
+                else:
+                    logging.info("one main and sub player can't")
+                return
+
+            if denied_main >=2:
+                logging.info("2 or more main players can not play")
+                return
+            logging.info("wait for more reactions")
+        except  Exception as e:
+            logging.error(f"an error occurred: {e}")
 
     async def on_ready(self):
         logging.info(f'Logged in as {self.client.user}')
@@ -172,7 +202,6 @@ class DiscordBot:
                         async for user in reaction.users():
                             if user != self.client.user:  # Ignoriere den Bot selbst
                                 self.reactions_dict[user.id] = str(reaction.emoji)
-                                await self.check_approved_reaction_count(message)
                                 logging.info(f'Benutzer {user.id} hat mit {reaction.emoji} reagiert.')
                     break
                 break
