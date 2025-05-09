@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import AsyncMock, patch, MagicMock
 from discordBot import DiscordBot
 from erApi import get_highest_account, Smug, FDGood, Uvabu, Bobou
+#TODO: Update tests to work and reflect the updated code
 
 class TestDiscordBot(unittest.IsolatedAsyncioTestCase):
     def setUp(self):

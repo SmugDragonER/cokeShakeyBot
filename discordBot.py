@@ -2,6 +2,7 @@ import logging
 from discord import Intents, Client, Message, Reaction
 from erApi import get_highest_account, Smug, FDGood, Uvabu, Bobou, team_ranking
 import json
+from typing import  Optional
 
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -73,12 +74,16 @@ class DiscordBot:
         if user_message.startswith('!register'):
             await self.send_register_message(message, user_message)
 
-## TODO: Update function
+        ## TODO: Update function
         if user_message.startswith('!update'):
             await self.update_signup_message(message)
 
         if user_message.startswith('!teamrank'):
             await self.send_message(channel.id, await self.send_team_ranking())
+
+    async def update_signup_message(self, message: Message) -> None:
+
+##TODO: implement logic to update already send sign up messages
 
     async def add_register_reactions(self, message: Message) -> None:
         try:
@@ -89,8 +94,6 @@ class DiscordBot:
 
     async def send_full_signup(self, message: Message, main_team: bool) -> None:
         try:
-            main_team = None
-
             highest_smug = get_highest_account(Smug)
             highest_uvabu = get_highest_account(Uvabu)
             highest_fdgood = get_highest_account(FDGood)
@@ -126,7 +129,7 @@ class DiscordBot:
         except Exception as e:
             logging.error(f"An error occurred: {e}")
 
-    async def on_reaction_add(self, reaction: Reaction, user) -> None:
+    async def on_reaction_add(self, reaction: Reaction, user) -> Optional[str]:
         try:
             if reaction.message.author == self.client.user:
                 if user != self.client.user:
@@ -139,7 +142,7 @@ class DiscordBot:
             logging.error(f"An error occurred: {e}")
 
 
-    async def check_reactions(self, message: Message) -> None:
+    async def check_reactions(self, message: Message) -> Optional[str]:
         """
             Überprüft die Anzahl der genehmigten und abgelehnten Reaktionen für das übergebene Nachricht-Objekt.
 
@@ -159,26 +162,29 @@ class DiscordBot:
             # Reactions of Sub Players
             sub_team_reactions =[self.reactions_dict.get(player['discord_id']) for player in self.sub_team]
             sub_approved =[r for r in sub_team_reactions if r == '✅']
-            sub_denied =[r for r in sub_team_reactions if r == '❌']
 
             if approved_main ==len(self.main_team):
                 logging.info("All main players can play. Going into send_full_signup with true from check_reactions.")
                 await self.send_full_signup(self.reacted_message,True)
-                return
+                return None
 
             if denied_main == 1 and approved_main == len(self.main_team) - 1:
                 if sub_approved:
                     logging.info("one main can not play but sub can! Going into send_full_signup with false from check_reactions.")
-                    await  self.send_full_signup(self.reacted_message,False)
+                    denied_player = next(
+                        (player for player in self.main_team if self.reactions_dict.get(player['discord_id']) == '❌'),
+                    )
+                    await message.channel.send(f"{denied_player['name']} can't play, playing with Sub intead!")
+                    await self.send_full_signup(self.reacted_message,False)
                 elif any(r is None for r in sub_team_reactions):
                     logging.info("one main player can't, wait for sub")
                 else:
                     logging.info("one main and sub player can't")
-                return
+                return None
 
             if denied_main >=2:
                 logging.info("2 or more main players can not play")
-                return
+                return None
             logging.info("wait for more reactions")
         except  Exception as e:
             logging.error(f"an error occurred: {e}")
