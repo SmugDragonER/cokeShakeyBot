@@ -5,6 +5,7 @@ import json
 from typing import  Optional
 
 from commands.help import handle_help
+from commands.register import handle_register, add_register_reactions, send_full_signup, on_reaction_add, check_reactions
 
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -60,13 +61,7 @@ class DiscordBot:
             logging.error(f"Couldn't send message: {e}")
 
     async def send_register_message(self, message: Message, user_message: str) -> None:
-        response = user_message[10:]  # Remove the '!' and use the rest of the message as the response
-        logging.info("entered send_register_message")
-        try:
-            sent_message = await message.channel.send(response)
-            await self.add_register_reactions(sent_message)
-        except Exception as e:
-            logging.error(e)
+        await handle_register(message, user_message, self.add_register_reactions)
 
     async def on_message(self, message: Message) -> None:
         if message.author == self.client.user:
@@ -91,108 +86,18 @@ class DiscordBot:
             await self.send_message(channel.id, await self.send_team_ranking())
 
     async def add_register_reactions(self, message: Message) -> None:
-        try:
-            await message.add_reaction(self.approved_reaction_emoji)
-            await message.add_reaction(self.deny_reaction_emoji)
-        except Exception as e:
-            logging.error(f"Couldn't add reactions: {e}")
+        await add_register_reactions(message, self.approved_reaction_emoji, self.deny_reaction_emoji)
 
     async def send_full_signup(self, message: Message, main_team: bool) -> None:
-        try:
-            highest_smug = get_highest_account(Smug)
-            highest_uvabu = get_highest_account(Uvabu)
-            highest_fdgood = get_highest_account(FDGood)
-            highest_bobou = get_highest_account(Bobou)
+        await send_full_signup(message, main_team, self.reacted_message, self.smug_discord_id, self.uvabu_discord_id,
+                               self.fd_discord_id, self.bobou_discord_id, get_highest_account)
 
-            custom_message_full_roaster = (
-                f"Scrim sign-ups for {self.reacted_message.content}\n with Sub"
-                f"!register CatSlide\n"
-                f"<@{self.smug_discord_id}> https://dak.gg/er/players/{highest_smug}\n"
-                f"<@{self.uvabu_discord_id}> https://dak.gg/er/players/{highest_uvabu}\n"
-                f"<@{self.fd_discord_id}> https://dak.gg/er/players/{highest_fdgood}\n"
-                f"<@{self.bobou_discord_id}> https://dak.gg/er/players/{highest_bobou}"
-            )
+    async def on_reaction_add(self, reaction: Reaction, user) -> None:
+        await on_reaction_add(reaction, user, self.client, self.reactions_dict, self.check_reactions)
 
-            custom_message_main_roaster = (
-                f"Scrim sign-ups for {self.reacted_message.content} with main Players\n"
-                f"!register CatSlide\n"
-                f"<@{self.smug_discord_id}> https://dak.gg/er/players/{highest_smug}\n"
-                f"<@{self.uvabu_discord_id}> https://dak.gg/er/players/{highest_uvabu}\n"
-                f"<@{self.fd_discord_id}> https://dak.gg/er/players/{highest_fdgood}\n"
-            )
-
-            if main_team is True:
-                logging.info("sending the main team")
-                await(message.channel.send(custom_message_main_roaster))
-            elif main_team is False:
-                logging.info("sending the full team with sub")
-                await(message.channel.send(custom_message_full_roaster))
-            else:
-                logging.error("You forgot to send a bool value with send_full_signup")
-                return
-
-        except Exception as e:
-            logging.error(f"An error occurred: {e}")
-
-    async def on_reaction_add(self, reaction: Reaction, user) -> Optional[str]:
-        try:
-            if reaction.message.author == self.client.user:
-                if user != self.client.user:
-                    self.reactions_dict[user.id] = str(reaction.emoji)
-                    logging.info(f"Benutzer {user.id} hat mit {reaction.emoji} reagiert.")
-                    logging.debug(f"Aktuelles reactions_dict: {self.reactions_dict}")
-
-                    await self.check_reactions(reaction.message)
-        except Exception as e:
-            logging.error(f"An error occurred: {e}")
-
-
-    async def check_reactions(self, message: Message) -> Optional[str]:
-        """
-            Überprüft die Anzahl der genehmigten und abgelehnten Reaktionen für das übergebene Nachricht-Objekt.
-
-            Diese Methode analysiert die Reaktionen der Haupt- und Ersatzspieler auf eine Nachricht und führt
-            entsprechende Aktionen basierend auf der Anzahl der genehmigten (✅) und abgelehnten (❌) Reaktionen aus.
-        """
-
-        try:
-            # Reactions of Main Players
-            main_team_reactions = [self.reactions_dict.get(player['discord_id']) for player in self.main_team]
-            approved_main = main_team_reactions.count('✅')
-            denied_main = main_team_reactions.count('❌')
-
-            logging.info(f"Main-Team reactions: {main_team_reactions}")
-            logging.info(f"Approved: {approved_main}, Denied: {denied_main}")
-
-            # Reactions of Sub Players
-            sub_team_reactions =[self.reactions_dict.get(player['discord_id']) for player in self.sub_team]
-            sub_approved =[r for r in sub_team_reactions if r == '✅']
-
-            if approved_main ==len(self.main_team):
-                logging.info("All main players can play. Going into send_full_signup with true from check_reactions.")
-                await self.send_full_signup(self.reacted_message,True)
-                return None
-
-            if denied_main == 1 and approved_main == len(self.main_team) - 1:
-                if sub_approved:
-                    logging.info("one main can not play but sub can! Going into send_full_signup with false from check_reactions.")
-                    denied_player = next(
-                        (player for player in self.main_team if self.reactions_dict.get(player['discord_id']) == '❌'),
-                    )
-                    await message.channel.send(f"{denied_player['name']} can't play, playing with Sub intead!")
-                    await self.send_full_signup(self.reacted_message,False)
-                elif any(r is None for r in sub_team_reactions):
-                    logging.info("one main player can't, wait for sub")
-                else:
-                    logging.info("one main and sub player can't")
-                return None
-
-            if denied_main >=2:
-                logging.info("2 or more main players can not play")
-                return None
-            logging.info("wait for more reactions")
-        except  Exception as e:
-            logging.error(f"an error occurred: {e}")
+    async def check_reactions(self, message: Message) -> None:
+        await check_reactions(message, self.main_team, self.sub_team, self.reactions_dict, self.send_full_signup,
+                              self.reacted_message)
 
     async def on_ready(self):
         logging.info(f'Logged in as {self.client.user}')
@@ -209,7 +114,7 @@ class DiscordBot:
                                 self.reactions_dict[user.id] = str(reaction.emoji)
                                 logging.info(f'Benutzer {user.id} hat mit {reaction.emoji} reagiert.')
                     logging.info("entering reacted_messages from on_ready")
-                    await(self.check_reactions(self.reacted_message))
+                    await self.check_reactions(self.reacted_message)
                 break
 
     async def on_error(self, event_method, *args, **kwargs):
