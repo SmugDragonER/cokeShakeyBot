@@ -2,7 +2,6 @@ from typing import Final
 import os
 from dotenv import load_dotenv
 from discordBot import DiscordBot
-import json
 
 # Load Token
 load_dotenv()

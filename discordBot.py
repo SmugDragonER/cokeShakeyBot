@@ -6,6 +6,7 @@ from typing import  Optional
 
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class DiscordBot:
     def __init__(self, token: str):
@@ -58,10 +59,10 @@ class DiscordBot:
 
     async def send_register_message(self, message: Message, user_message: str) -> None:
         response = user_message[10:]  # Remove the '!' and use the rest of the message as the response
+        logging.info("entered send_register_message")
         try:
             sent_message = await message.channel.send(response)
             await self.add_register_reactions(sent_message)
-            await message.delete()  # Delete the original message
         except Exception as e:
             logging.error(e)
 
@@ -71,12 +72,14 @@ class DiscordBot:
 
         user_message = message.content
         channel = message.channel
+
         if user_message.startswith('!register'):
             await self.send_register_message(message, user_message)
+            return
 
         ## TODO: Update function
-        if user_message.startswith('!update'):
-            await self.update_signup_message(message)
+       # if user_message.startswith('!update'):
+        #    await self.update_signup_message(message)
 
         if user_message.startswith('!teamrank'):
             await self.send_message(channel.id, await self.send_team_ranking())
