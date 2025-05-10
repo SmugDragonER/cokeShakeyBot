@@ -33,8 +33,9 @@ async def send_full_signup(message: Message, main_team: bool, reacted_message: M
         highest_fdgood = get_highest_account("FDGood")
         highest_bobou = get_highest_account("Bobou")
 
-        custom_message_full_roaster = (
-            f"Scrim sign-ups for {reacted_message.content}\n with Sub"
+        custom_message_full_roaster_head = (
+            f"Scrim sign-ups for {reacted_message.content}\n with Sub")
+        custom_message_full_roaster_body = (
             f"!register CatSlide\n"
             f"<@{smug_id}> https://dak.gg/er/players/{highest_smug}\n"
             f"<@{uvabu_id}> https://dak.gg/er/players/{highest_uvabu}\n"
@@ -42,8 +43,9 @@ async def send_full_signup(message: Message, main_team: bool, reacted_message: M
             f"<@{bobou_id}> https://dak.gg/er/players/{highest_bobou}"
         )
 
-        custom_message_main_roaster = (
-            f"Scrim sign-ups for {reacted_message.content} with main Players\n"
+        custom_message_main_roaster_head = (
+            f"Scrim sign-ups for {reacted_message.content} with main Players\n")
+        custom_message_main_roaster_body = (
             f"!register CatSlide\n"
             f"<@{smug_id}> https://dak.gg/er/players/{highest_smug}\n"
             f"<@{uvabu_id}> https://dak.gg/er/players/{highest_uvabu}\n"
@@ -52,10 +54,12 @@ async def send_full_signup(message: Message, main_team: bool, reacted_message: M
 
         if main_team is True:
             logging.info("sending the main team")
-            await(message.channel.send(custom_message_main_roaster))
+            await message.channel.send(custom_message_main_roaster_head)
+            await message.channel.send(custom_message_main_roaster_body)
         elif main_team is False:
             logging.info("sending the full team with sub")
-            await(message.channel.send(custom_message_full_roaster))
+            await message.channel.send(custom_message_full_roaster_head)
+            await message.channel.send(custom_message_full_roaster_body)
         else:
             logging.error("You forgot to send a bool value with send_full_signup")
             return
