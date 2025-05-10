@@ -1,12 +1,18 @@
+import asyncio
 import logging
 from discord import Message, Reaction
+import asyncio
 
 async def handle_register(message: Message, user_message: str, add_reactions_function) -> None:
     response = user_message[10:]  # Remove the '!' and use the rest of the message as the response
     logging.info("entered send_register_message")
+    logging.info(response)
     try:
         sent_message = await message.channel.send(response)
+        logging.info(sent_message)
+        await asyncio.sleep(0.5)
         await add_reactions_function(sent_message)
+        logging.info("added reactions")
     except Exception as e:
         logging.error(f" Error in handle_register: {e}")
 
@@ -14,6 +20,7 @@ async def handle_register(message: Message, user_message: str, add_reactions_fun
 async def add_register_reactions(message: Message, approved_reaction_emoji: str, deny_reaction_emoji: str) -> None:
     try:
         await message.add_reaction(approved_reaction_emoji)
+        await asyncio.sleep(0.5)
         await message.add_reaction(deny_reaction_emoji)
     except Exception as e:
         logging.error(f"Couldn't add reactions: {e}")

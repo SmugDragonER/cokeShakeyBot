@@ -9,5 +9,5 @@ async def handle_help(send_message_function, channel_id: int) -> None:
                     f"CURRENTLY NOT WORKING, bot will update final signup messages with the highest MMR account of every player\n\n"
                     f"**!teamrank**\n"
                     f"bot will send the rank of every teammembers account, sorted from highest to lowest\n\n")
-    await send_message_function(help_message, channel_id)
+    await send_message_function(channel_id, help_message)
     return

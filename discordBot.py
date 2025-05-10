@@ -8,8 +8,8 @@ from commands.help import handle_help
 from commands.register import handle_register, add_register_reactions, send_full_signup, on_reaction_add, check_reactions
 
 # Logging konfigurieren
+import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class DiscordBot:
     def __init__(self, token: str):
@@ -42,7 +42,6 @@ class DiscordBot:
         self.reacted_message = None
 
         self.client.event(self.on_ready)
-        self.client.event(self.on_message)
         self.client.event(self.on_reaction_add)
         self.client.event(self.on_error)
         self.client.event(self.on_disconnect)
@@ -75,6 +74,7 @@ class DiscordBot:
             return
 
         if user_message.startswith('!help'):
+            logging.debug(f"Channel ID: {message.channel.id}")
             await handle_help(self.send_message, message.channel.id)
             return
 
