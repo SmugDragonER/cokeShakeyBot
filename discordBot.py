@@ -81,10 +81,6 @@ class DiscordBot:
         if user_message.startswith('!teamrank'):
             await self.send_message(channel.id, await self.send_team_ranking())
 
-    async def update_signup_message(self, message: Message) -> None:
-
-##TODO: implement logic to update already send sign up messages
-
     async def add_register_reactions(self, message: Message) -> None:
         try:
             await message.add_reaction(self.approved_reaction_emoji)
