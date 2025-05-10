@@ -4,6 +4,8 @@ from erApi import get_highest_account, Smug, FDGood, Uvabu, Bobou, team_ranking
 import json
 from typing import  Optional
 
+from commands.help import handle_help
+
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -75,6 +77,10 @@ class DiscordBot:
 
         if user_message.startswith('!register'):
             await self.send_register_message(message, user_message)
+            return
+
+        if user_message.startswith('!help'):
+            await handle_help(self.send_message, message.channel.id)
             return
 
         ## TODO: Update function
