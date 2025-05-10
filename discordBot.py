@@ -1,14 +1,12 @@
 import logging
 from discord import Intents, Client, Message, Reaction
-from erApi import get_highest_account, Smug, FDGood, Uvabu, Bobou, team_ranking
+from erApi import get_highest_account
 import json
-from typing import  Optional
 
 from commands.help import handle_help
 from commands.register import handle_register, add_register_reactions, send_full_signup, on_reaction_add, check_reactions
-
+from commands.teamrank import handle_teamrank
 # Logging konfigurieren
-import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class DiscordBot:
@@ -44,6 +42,7 @@ class DiscordBot:
         self.client.event(self.on_ready)
         self.client.event(self.on_reaction_add)
         self.client.event(self.on_error)
+        self.client.event(self.on_message)
         self.client.event(self.on_disconnect)
 
     def run(self):
@@ -59,18 +58,14 @@ class DiscordBot:
         except Exception as e:
             logging.error(f"Couldn't send message: {e}")
 
-    async def send_register_message(self, message: Message, user_message: str) -> None:
-        await handle_register(message, user_message, self.add_register_reactions)
-
     async def on_message(self, message: Message) -> None:
         if message.author == self.client.user:
             return
 
         user_message = message.content
-        channel = message.channel
 
         if user_message.startswith('!register'):
-            await self.send_register_message(message, user_message)
+            await handle_register(self.send_message,self.client, message.channel.id, user_message)
             return
 
         if user_message.startswith('!help'):
@@ -83,7 +78,8 @@ class DiscordBot:
         #    await self.update_signup_message(message)
 
         if user_message.startswith('!teamrank'):
-            await self.send_message(channel.id, await self.send_team_ranking())
+            await handle_teamrank(self.send_message, message.channel.id)
+            return
 
     async def add_register_reactions(self, message: Message) -> None:
         await add_register_reactions(message, self.approved_reaction_emoji, self.deny_reaction_emoji)

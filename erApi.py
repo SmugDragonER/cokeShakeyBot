@@ -1,3 +1,4 @@
+import json
 import requests
 import time
 import os
@@ -12,11 +13,14 @@ BASE_URL = 'https://open-api.bser.io/v1'
 seasonId = 31  # Season 15
 matchingTeamMode = 3  # Squads
 
-# Lists of player names
-Smug = ["SmugDragon", "HuntMeNadine"]
-FDGood = ["FDGood"]
-Uvabu = ["Uvabu", "Getcha", "ohmahgah"]
-Bobou = ["팀워크와영광", "GuiltyChallenger"]
+with open('cokeShakeyTeam.json', 'r', encoding='utf-8') as f:
+    team_data = json.load(f)
+
+Smug = next(player["accounts"] for player in team_data["main_team"] if player["name"] == "Smug")
+FDGood = next(player["accounts"] for player in team_data["main_team"] if player["name"] == "FDGood")
+Uvabu = next(player["accounts"] for player in team_data["main_team"] if player["name"] == "Uvabu")
+
+Bobou = next(player["accounts"] for player in team_data["sub_team"] if player["name"] == "Bobou")
 
 # Create a session to persist certain parameters across requests
 session = requests.Session()
@@ -61,52 +65,15 @@ def get_user_rank(player_name: str, matchingTeamMode: int = matchingTeamMode, se
     user_mmr = user_info['userRank']['mmr']
     return user_mmr
 
-def get_highest_account(player: list) -> str:
+def get_highest_account(player_accounts: list) -> str:
     # Get the account with the highest MMR for a list of player names
     current_mmr = -1
     highest_account = None
 
-    for account_name in player:
+    for account_name in player_accounts:
         checking_mmr = get_user_rank(account_name)
         if current_mmr < checking_mmr:
             current_mmr = checking_mmr
             highest_account = account_name
     return highest_account
 
-def team_ranking(Team: dict) -> dict:
-    team_ranking = {}
-
-    for key, players in Team.items():
-        team_ranking[key] = {}
-        for player in players:
-            player_mmr = get_user_rank(player)
-            team_ranking[key][player] = player_mmr
-    return team_ranking
-
-def get_team_average(Team: dict) -> dict:
-    # Calculate the average MMR for a team
-    team_mmr = {}
-    total_mmr = 0
-    count = 0
-
-    for key, players in Team.items():
-        highest_account = get_highest_account(players)
-        highest_mmr = get_user_rank(highest_account)
-        team_mmr[key] = {'account': highest_account, 'mmr': highest_mmr}
-        total_mmr += highest_mmr
-        count += 1
-
-    team_mmr['average_mmr'] = round(total_mmr / count, 2) if count > 0 else 0
-    return team_mmr
-
-if __name__ == "__main__":
-    # Define the teams
-    Team = {1: Smug, 2: FDGood, 3: Uvabu}
-
-    # Calculate and print the team ranking
-    team_ranking_result = team_ranking(Team)
-    print("Team Ranking:")
-    for team, players in team_ranking_result.items():
-        print(f"Team {team}:")
-        for player, mmr in players.items():
-            print(f"  {player}: {mmr}")

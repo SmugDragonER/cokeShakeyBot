@@ -2,21 +2,26 @@
   "main_team": [
     {
       "name": "Smug",
-      "discord_id": 342049022812356611
+      "discord_id": 342049022812356611,
+      "accounts": ["SmugDragon", "HuntMeNadine"]
     },
     {
       "name": "Uvabu",
-      "discord_id": 452694750248828948
+      "discord_id": 452694750248828948,
+      "accounts": ["Uvabu", "Getcha", "ohmahgah"]
+
     },
     {
       "name": "FDGood",
-      "discord_id": 242244489413001219
+      "discord_id": 242244489413001219,
+      "accounts": ["FDGood"]
     }
   ],
   "sub_team": [
     {
       "name": "Bobou",
-      "discord_id": 127610213615271936
+      "discord_id": 127610213615271936,
+      "accounts": ["팀워크와영광", "GuiltyChallenger"]
     }
   ]
 }
