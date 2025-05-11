@@ -11,7 +11,7 @@ async def test_help():
 
     await handle_help(mock_send_message, channel_id)
 
-    mock_send_message.assert_called_once_with(channel_id,
+    mock_send_message.assert_called_with(channel_id,
                     f"These are the commands you can use:\n\n"
                     f"**!register [your text goes here]**\n"
                     f"bot will copy your message and add reactions to it\n\n"

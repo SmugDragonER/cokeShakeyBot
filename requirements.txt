@@ -1,5 +1,6 @@
-python-dotenv
-discord
+python-dotenv~=1.1.0
+discord~=2.3.2
 discord.py
-requests
-ratelimit
+requests~=2.32.3
+ratelimit~=2.2.1
+pytest~=8.3.5
