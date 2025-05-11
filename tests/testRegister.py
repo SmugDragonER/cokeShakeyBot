@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import AsyncMock
-from commands.register import send_full_signup
+from commands.register import send_full_signup, add_register_reactions
 
 
 @pytest.mark.asyncio
@@ -72,3 +72,14 @@ async def test_send_full_signup_with_sub():
         f"<@{fdgood_id}> https://dak.gg/er/players/MockedAccount_FDGood\n"
         f"<@{bobou_id}> https://dak.gg/er/players/MockedAccount_Bobou"
     )
+
+@pytest.mark.asyncio
+async def test_add_register_reactions():
+    sent_message = AsyncMock()
+    approved_reaction_emoji = "✅"
+    deny_reaction_emoji = "❌"
+
+    await add_register_reactions(sent_message, approved_reaction_emoji, deny_reaction_emoji)
+
+    sent_message.add_reaction.assert_any_call(approved_reaction_emoji)
+    sent_message.add_reaction.assert_any_call(deny_reaction_emoji)
