@@ -1,6 +1,6 @@
 import pytest
-from unittest.mock import AsyncMock
-from commands.register import send_full_signup, add_register_reactions
+from unittest.mock import AsyncMock, MagicMock
+from commands.register import send_full_signup, add_register_reactions, get_last_bot_message
 
 
 @pytest.mark.asyncio
@@ -83,3 +83,20 @@ async def test_add_register_reactions():
 
     sent_message.add_reaction.assert_any_call(approved_reaction_emoji)
     sent_message.add_reaction.assert_any_call(deny_reaction_emoji)
+
+@pytest.mark.asyncio
+async def test_get_last_bot_message():
+    client = MagicMock()
+    channel_id = 123456789
+    message = AsyncMock()
+    message.author.bot = True
+
+    async def mock_history(*args, **kwargs):
+        yield message
+    channel_mock = AsyncMock()
+    channel_mock.history = mock_history
+    client.get_channel.return_value.history = mock_history
+    result = await get_last_bot_message(client, channel_id)
+
+    assert result == message
+    client.get_channel.assert_called_once_with(channel_id)
