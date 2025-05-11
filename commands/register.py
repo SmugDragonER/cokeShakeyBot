@@ -78,13 +78,12 @@ async def send_full_signup(message: Message, main_team: bool, reacted_message: M
 
 async def on_reaction_add(reaction: Reaction, user, client, reactions_dict, check_reactions_function) -> None:
     try:
-        if reaction.message.author == client.user:
-            if user != client.user:
-                reactions_dict[user.id] = str(reaction.emoji)
-                logging.info(f"Benutzer {user.id} hat mit {reaction.emoji} reagiert.")
-                logging.debug(f"Aktuelles reactions_dict: {reactions_dict}")
+        if reaction.message.author == client.user and user != client.user:
+            reactions_dict[user.id] = str(reaction.emoji)
+            logging.info(f"Benutzer {user.id} hat mit {reaction.emoji} reagiert.")
+            logging.debug(f"Aktuelles reactions_dict: {reactions_dict}")
 
-                await check_reactions_function(reaction.message)
+            await check_reactions_function(reaction.message)
     except Exception as e:
         logging.error(f"An error occurred: {e}")
 

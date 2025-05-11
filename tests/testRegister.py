@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
-from commands.register import send_full_signup, add_register_reactions, get_last_bot_message
+from commands.register import send_full_signup, add_register_reactions, get_last_bot_message, on_reaction_add
 
 
 @pytest.mark.asyncio
@@ -100,3 +100,24 @@ async def test_get_last_bot_message():
 
     assert result == message
     client.get_channel.assert_called_once_with(channel_id)
+
+@pytest.mark.asyncio
+async def test_on_reaction_add():
+    client = MagicMock()
+    reaction = AsyncMock()
+    reaction.emoji = "✅"
+    user = AsyncMock()
+    user.id = 123456789
+    reaction.message = AsyncMock()
+    reaction.message.author = client.user
+    reaction.message.channel = AsyncMock()
+    reaction_dict = {
+        123456789: None}
+    check_reaction_function = AsyncMock()
+
+    assert user != client.user
+
+    await on_reaction_add(reaction, user, client, reaction_dict, check_reaction_function)
+    assert reaction_dict[user.id] == "✅"
+
+    check_reaction_function.assert_called_once_with(reaction.message)
