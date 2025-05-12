@@ -16,15 +16,14 @@ async def handle_register(send_message_function,client, channel_id: int, user_me
     except Exception as e:
         logging.error(f" Error in handle_register: {e}")
 
-async def get_last_bot_message(client, channel_id: int) -> str:
+async def get_last_bot_message(client, channel_id: int) -> Message:
     try:
         channel = client.get_channel(channel_id)
-        async for message in channel.history(limit=1):
+        async for message in channel.history(limit=5):
             if message.author.bot:
                 return message
     except Exception as e:
         logging.error(f" Error in get_last_bot_message: {e}")
-    return None
 
 async def add_register_reactions(message: Message, approved_reaction_emoji: str, deny_reaction_emoji: str) -> None:
     try:

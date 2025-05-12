@@ -4,10 +4,17 @@ from erApi import get_highest_account
 import json
 
 from commands.help import handle_help
-from commands.register import handle_register, add_register_reactions, send_full_signup, on_reaction_add, check_reactions
+from commands.register import (handle_register, add_register_reactions, send_full_signup, on_reaction_add,
+                               check_reactions)
 from commands.teamrank import handle_teamrank
+from commands.update import handle_update
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+
+async def extract_channel_id_from_message(message: Message):
+    return message.channel.id
+
 
 class DiscordBot:
     def __init__(self, token: str):
@@ -62,22 +69,23 @@ class DiscordBot:
         if message.author == self.client.user:
             return
 
-        user_message = message.content
+        user_message_str = message.content
+        user_message = message
 
-        if user_message.startswith('!register'):
-            await handle_register(self.send_message,self.client, message.channel.id, user_message)
+        if user_message_str.startswith('!register'):
+            await handle_register(self.send_message,self.client, message.channel.id, user_message_str)
             return
 
-        if user_message.startswith('!help'):
+        if user_message_str.startswith('!help'):
             logging.debug(f"Channel ID: {message.channel.id}")
             await handle_help(self.send_message, message.channel.id)
             return
 
-        ## TODO: Update function
-       # if user_message.startswith('!update'):
-        #    await self.update_signup_message(message)
+        if user_message_str.startswith('!update'):
+                await handle_update(self.client, user_message, self.smug_discord_id, self.uvabu_discord_id,
+                                    self.fd_discord_id, self.bobou_discord_id)
 
-        if user_message.startswith('!teamrank'):
+        if user_message_str.startswith('!teamrank'):
             await handle_teamrank(self.send_message, message.channel.id)
             return
 
