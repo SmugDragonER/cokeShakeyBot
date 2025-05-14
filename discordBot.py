@@ -1,6 +1,7 @@
 import logging
 from discord import Intents, Client, Message, Reaction
 from erApi import get_highest_account
+from utils import extract_channel_id_from_message
 import json
 
 from commands.help import handle_help
@@ -10,11 +11,6 @@ from commands.teamrank import handle_teamrank
 from commands.update import handle_update
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-
-async def extract_channel_id_from_message(message: Message):
-    return message.channel.id
-
 
 class DiscordBot:
     def __init__(self, token: str):

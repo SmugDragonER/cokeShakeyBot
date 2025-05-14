@@ -1,7 +1,7 @@
 from discord import Message
 import logging
 from commands.register import get_last_bot_message
-from discordBot import extract_channel_id_from_message
+from utils import extract_channel_id_from_message
 from erApi import get_highest_account
 
 
