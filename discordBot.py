@@ -43,7 +43,6 @@ class DiscordBot:
         self.reacted_message = None
 
         self.client.event(self.on_ready)
-        self.client.event(self.on_reaction_add)
         self.client.event(self.on_error)
         self.client.event(self.on_message)
         self.client.event(self.on_disconnect)
@@ -85,20 +84,6 @@ class DiscordBot:
             await handle_teamrank(self.send_message, message.channel.id)
             return
 
-    async def add_register_reactions(self, message: Message) -> None:
-        await add_register_reactions(message, self.approved_reaction_emoji, self.deny_reaction_emoji)
-
-    async def send_full_signup(self, message: Message, main_team: bool) -> None:
-        await send_full_signup(message, main_team, self.reacted_message, self.smug_discord_id, self.uvabu_discord_id,
-                               self.fd_discord_id, self.bobou_discord_id, get_highest_account)
-
-    async def on_reaction_add(self, reaction: Reaction, user) -> None:
-        await on_reaction_add(reaction, user, self.client, self.reactions_dict, self.check_reactions)
-
-    async def check_reactions(self, message: Message) -> None:
-        await check_reactions(message, self.main_team, self.sub_team, self.reactions_dict, self.send_full_signup,
-                              self.reacted_message)
-
     async def on_ready(self):
         logging.info(f'Logged in as {self.client.user}')
         channel = self.client.get_channel(1328537451068919838)
@@ -114,7 +99,14 @@ class DiscordBot:
                                 self.reactions_dict[user.id] = str(reaction.emoji)
                                 logging.info(f'Benutzer {user.id} hat mit {reaction.emoji} reagiert.')
                     logging.info("entering reacted_messages from on_ready")
-                    await self.check_reactions(self.reacted_message)
+                    await check_reactions(
+                        self.reacted_message,
+                        self.main_team,
+                        self.sub_team,
+                        self.reactions_dict,
+                        send_full_signup,
+                        self.reacted_message
+                    )
                 break
 
     async def on_error(self, event_method, *args, **kwargs):
