@@ -22,6 +22,19 @@ def get_dates_for_week(year: int, week: int) -> dict[str, str]:
     }
     return days
 
+
+def get_discord_timestamps_for_week(year: int, week: int, style: str = "D") -> dict[str, str]:
+    first_day_of_year = datetime(year, 1, 4)
+    start_of_week = first_day_of_year + timedelta(weeks=week - 1)
+    start_of_week -= timedelta(days=start_of_week.weekday())
+
+    timestamps = {
+        "Freitag": int((start_of_week + timedelta(days=4)).replace(hour=18, minute=0, second=0, microsecond=0).timestamp()),
+        "Samstag": int((start_of_week + timedelta(days=5)).replace(hour=18, minute=0, second=0, microsecond=0).timestamp()),
+        "Sonntag": int((start_of_week + timedelta(days=6)).replace(hour=18, minute=0, second=0, microsecond=0).timestamp()),
+    }
+    return {day: f"<t:{ts}:{style}>" for day, ts in timestamps.items()}
+
 def get_team_from_db(team_name: str) -> Optional[Team]:
     db = TinyDB('scrim_teams.json')
     teams_table = db.table('teams')

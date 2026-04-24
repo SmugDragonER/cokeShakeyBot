@@ -10,17 +10,8 @@ from ratelimit import limits, sleep_and_retry
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
 BASE_URL = 'https://open-api.bser.io/v1'
-seasonId = 31  # Season 15
+seasonId = 39 # Season 11 
 matchingTeamMode = 3  # Squads
-
-# with open('cokeShakeyTeam.json', 'r', encoding='utf-8') as f:
-#     team_data = json.load(f)
-
-# Smug = next(player["accounts"] for player in team_data["main_team"] if player["name"] == "Smug")
-# FDGood = next(player["accounts"] for player in team_data["main_team"] if player["name"] == "FDGood")
-# Uvabu = next(player["accounts"] for player in team_data["main_team"] if player["name"] == "Uvabu")
-
-# Bobou = next(player["accounts"] for player in team_data["sub_team"] if player["name"] == "Bobou")
 
 # Create a session to persist certain parameters across requests
 session = requests.Session()

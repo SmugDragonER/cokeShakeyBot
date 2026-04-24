@@ -7,7 +7,7 @@ import logging
 from discord import Client, Message, Reaction
 
 from models import Team
-from utils import get_dates_for_week, get_team_from_db
+from utils import get_dates_for_week, get_discord_timestamps_for_week, get_team_from_db
 
 
 @dataclass
@@ -120,15 +120,21 @@ async def handle_register(
 
     now = datetime.now().isocalendar()
     dates = get_dates_for_week(now.year, now.week)
+    discord_dates = get_discord_timestamps_for_week(now.year, now.week)
 
     for day_label, day_date in dates.items():
-        content = f"Scrim sign-ups for {team.name} - {day_label} ({day_date})"
+        day_ts = discord_dates[day_label]
+        content = f"Scrim sign-ups for {team.name} - {day_label} ({day_ts} / {day_date})"
         message = await send_message_function(channel_id, content)
         if message is None:
             logging.error("Could not send signup message")
             continue
 
-        session = RegistrationSession(team=team, day_label=f"{day_label} ({day_date})", signup_message=message)
+        session = RegistrationSession(
+            team=team,
+            day_label=f"{day_label} ({day_ts} / {day_date})",
+            signup_message=message,
+        )
         ACTIVE_REGISTRATIONS[message.id] = session
         await message.add_reaction("✅")
         await message.add_reaction("❌")
