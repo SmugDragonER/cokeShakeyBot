@@ -95,13 +95,13 @@ Teams are saved in TinyDB file:
 
 - `scrim_teams.json`
 
-The active registration sessions are kept in memory while the bot is running.
+The active registration sessions are persisted in `active_registrations.json` so reactions still work after a bot restart.
 
 ## Current Limitations
 
 - `!teamrank` still reads from `cokeShakeyTeam.json` and expects old account structures.
 - `!update` is still legacy and not yet adapted to dynamic TinyDB teams.
-- Active registrations are in-memory only (not persisted across bot restarts).
+- Active registrations are persisted, but if `active_registrations.json` is deleted then in-flight registrations will be lost.
 
 ## Development Notes
 
