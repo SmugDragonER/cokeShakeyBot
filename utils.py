@@ -16,22 +16,22 @@ def get_dates_for_week(year: int, week: int) -> dict[str, str]:
 
     # Fr, Sa, So berechnen
     days = {
-        "Freitag": (start_of_week + timedelta(days=4)).strftime("%d.%m.%Y"),
-        "Samstag": (start_of_week + timedelta(days=5)).strftime("%d.%m.%Y"),
-        "Sonntag": (start_of_week + timedelta(days=6)).strftime("%d.%m.%Y"),
+        "Fr": (start_of_week + timedelta(days=4)).strftime("%d.%m.%Y"),
+        "Sa": (start_of_week + timedelta(days=5)).strftime("%d.%m.%Y"),
+        "So": (start_of_week + timedelta(days=6)).strftime("%d.%m.%Y"),
     }
     return days
 
 
-def get_discord_timestamps_for_week(year: int, week: int, style: str = "D") -> dict[str, str]:
+def get_discord_timestamps_for_week(year: int, week: int, style: str = "F") -> dict[str, str]:
     first_day_of_year = datetime(year, 1, 4)
     start_of_week = first_day_of_year + timedelta(weeks=week - 1)
     start_of_week -= timedelta(days=start_of_week.weekday())
 
     timestamps = {
-        "Freitag": int((start_of_week + timedelta(days=4)).replace(hour=18, minute=0, second=0, microsecond=0).timestamp()),
-        "Samstag": int((start_of_week + timedelta(days=5)).replace(hour=18, minute=0, second=0, microsecond=0).timestamp()),
-        "Sonntag": int((start_of_week + timedelta(days=6)).replace(hour=18, minute=0, second=0, microsecond=0).timestamp()),
+        "Fr": int((start_of_week + timedelta(days=4)).replace(hour=18, minute=0, second=0, microsecond=0).timestamp()),
+        "Sat": int((start_of_week + timedelta(days=5)).replace(hour=18, minute=0, second=0, microsecond=0).timestamp()),
+        "Sun": int((start_of_week + timedelta(days=6)).replace(hour=18, minute=0, second=0, microsecond=0).timestamp()),
     }
     return {day: f"<t:{ts}:{style}>" for day, ts in timestamps.items()}
 

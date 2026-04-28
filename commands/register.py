@@ -215,7 +215,7 @@ async def handle_register(
 
     for day_label, day_date in dates.items():
         day_ts = discord_dates[day_label]
-        content = f"Scrim sign-ups for {team.name} - {day_label} ({day_ts} / {day_date})"
+        content = f"Scrim sign-ups for {team.name} - {day_ts}"
         message = await send_message_function(channel_id, content)
         if message is None:
             logging.error("Could not send signup message")
